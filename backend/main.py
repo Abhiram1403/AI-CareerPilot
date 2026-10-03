@@ -109,3 +109,29 @@ def get_my_profile(current_user: User = Depends(get_current_user)):
         "full_name": current_user.full_name,
         "email": current_user.email,
     }
+from fastapi import File, UploadFile
+
+from backend.resume_service import save_resume, extract_resume_text
+@app.post("/resume/upload")
+async def upload_resume(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        file_path = await save_resume(file)
+        resume_text = extract_resume_text(file_path)
+
+        return {
+            "message": "Resume uploaded successfully",
+            "filename": file.filename,
+            "text_length": len(resume_text),
+            "text_preview": resume_text[:500],
+            "user_id": current_user.id,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
+    
