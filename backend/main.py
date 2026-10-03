@@ -101,3 +101,11 @@ from backend.security import hash_password, verify_password
 from fastapi.security import OAuth2PasswordRequestForm
 from backend.auth import create_access_token
 from backend.security import hash_password, verify_password
+from backend.dependencies import get_current_user
+@app.get("/me")
+def get_my_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+    }
