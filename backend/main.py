@@ -1,9 +1,13 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from sqlalchemy.orm import Session
+
+from backend.database import get_db
+from backend.models import User
 
 app = FastAPI(
     title="AI-CareerPilot API",
     description="AI-powered personalized career guidance and job matching platform.",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 
@@ -21,3 +25,18 @@ def health_check():
         "status": "healthy",
         "service": "AI-CareerPilot API",
     }
+
+
+@app.get("/users")
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+
+    return [
+        {
+            "id": user.id,
+            "full_name": user.full_name,
+            "email": user.email,
+            "created_at": user.created_at,
+        }
+        for user in users
+    ]
