@@ -70,3 +70,34 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         "email": new_user.email,
         "created_at": new_user.created_at,
     }
+from fastapi.security import OAuth2PasswordRequestForm
+@app.post("/login")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.email == form_data.username).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password",
+        )
+
+    if not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password",
+        )
+
+    access_token = create_access_token(user.id)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+from backend.auth import create_access_token
+from backend.security import hash_password, verify_password
+from fastapi.security import OAuth2PasswordRequestForm
+from backend.auth import create_access_token
+from backend.security import hash_password, verify_password
