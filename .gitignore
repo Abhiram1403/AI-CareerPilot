@@ -41,3 +41,4 @@ htmlcov/
 # Local database
 *.sqlite3
 
+database/uploads/
